@@ -512,6 +512,13 @@ class TributeRange {
             left: left + windowLeft + span.offsetLeft + parseInt(computed.borderLeftWidth)
         }
 
+        if (element.nodeName === 'INPUT') {
+            const pos = rect.left + rect.width - coordinates.left;
+            if (pos < 0) {
+                coordinates.left = rect.left;
+            }
+        }
+
         let windowWidth = window.innerWidth
         let windowHeight = window.innerHeight
 

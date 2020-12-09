@@ -1,3 +1,5 @@
+
+(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(window.document);
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -66,7 +68,7 @@
     if (typeof o === "string") return _arrayLikeToArray(o, minLen);
     var n = Object.prototype.toString.call(o).slice(8, -1);
     if (n === "Object" && o.constructor) n = o.constructor.name;
-    if (n === "Map" || n === "Set") return Array.from(n);
+    if (n === "Map" || n === "Set") return Array.from(o);
     if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
   }
 
@@ -109,7 +111,7 @@
     };
   }
 
-  if (window && typeof window.CustomEvent !== "function") {
+  if (typeof window !== 'undefined' && typeof window.CustomEvent !== "function") {
     var CustomEvent$1 = function CustomEvent(event, params) {
       params = params || {
         bubbles: false,
@@ -142,16 +144,16 @@
         element.boundKeydown = this.keydown.bind(element, this);
         element.boundKeyup = this.keyup.bind(element, this);
         element.boundInput = this.input.bind(element, this);
-        element.addEventListener("keydown", element.boundKeydown, false);
-        element.addEventListener("keyup", element.boundKeyup, false);
-        element.addEventListener("input", element.boundInput, false);
+        element.addEventListener("keydown", element.boundKeydown, true);
+        element.addEventListener("keyup", element.boundKeyup, true);
+        element.addEventListener("input", element.boundInput, true);
       }
     }, {
       key: "unbind",
       value: function unbind(element) {
-        element.removeEventListener("keydown", element.boundKeydown, false);
-        element.removeEventListener("keyup", element.boundKeyup, false);
-        element.removeEventListener("input", element.boundInput, false);
+        element.removeEventListener("keydown", element.boundKeydown, true);
+        element.removeEventListener("keyup", element.boundKeyup, true);
+        element.removeEventListener("input", element.boundInput, true);
         delete element.boundKeydown;
         delete element.boundKeyup;
         delete element.boundInput;
@@ -826,8 +828,6 @@
     }, {
       key: "getLastWordInText",
       value: function getLastWordInText(text) {
-        text = text.replace(/\u00A0/g, ' '); // https://stackoverflow.com/questions/29850407/how-do-i-replace-unicode-character-u00a0-with-a-space-in-javascript
-
         var wordsArray;
 
         if (this.tribute.autocompleteSeparator) {
@@ -836,8 +836,8 @@
           wordsArray = text.split(/\s+/);
         }
 
-        var worldsCount = wordsArray.length - 1;
-        return wordsArray[worldsCount].trim();
+        var wordsCount = wordsArray.length - 1;
+        return wordsArray[wordsCount];
       }
     }, {
       key: "getTriggerInfo",
@@ -886,7 +886,7 @@
             }
           });
 
-          if (mostRecentTriggerCharPos >= 0 && (mostRecentTriggerCharPos === 0 || !requireLeadingSpace || /[\xA0\s]/g.test(effectiveRange.substring(mostRecentTriggerCharPos - 1, mostRecentTriggerCharPos)))) {
+          if (mostRecentTriggerCharPos >= 0 && (mostRecentTriggerCharPos === 0 || !requireLeadingSpace || /\s/.test(effectiveRange.substring(mostRecentTriggerCharPos - 1, mostRecentTriggerCharPos)))) {
             var currentTriggerSnippet = effectiveRange.substring(mostRecentTriggerCharPos + triggerChar.length, effectiveRange.length);
             triggerChar = effectiveRange.substring(mostRecentTriggerCharPos, mostRecentTriggerCharPos + triggerChar.length);
             var firstSnippetChar = currentTriggerSnippet.substring(0, 1);
@@ -1034,6 +1034,15 @@
           top: top + windowTop + span.offsetTop + parseInt(computed.borderTopWidth) + parseInt(computed.fontSize) - element.scrollTop,
           left: left + windowLeft + span.offsetLeft + parseInt(computed.borderLeftWidth)
         };
+
+        if (element.nodeName === 'INPUT') {
+          var pos = rect.left + rect.width - coordinates.left;
+
+          if (pos < 0) {
+            coordinates.left = rect.left;
+          }
+        }
+
         var windowWidth = window.innerWidth;
         var windowHeight = window.innerHeight;
         var menuDimensions = this.getMenuDimensions();
@@ -1547,10 +1556,8 @@
       key: "ensureEditable",
       value: function ensureEditable(element) {
         if (Tribute.inputTypes().indexOf(element.nodeName) === -1) {
-          if (element.contentEditable) {
-            element.contentEditable = true;
-          } else {
-            throw new Error("[Tribute] Cannot bind to " + element.nodeName);
+          if (!element.contentEditable) {
+            throw new Error("[Tribute] Cannot bind to " + element.nodeName + ", not contentEditable");
           }
         }
       }
