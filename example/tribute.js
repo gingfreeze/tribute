@@ -1037,7 +1037,9 @@
           var pos = rect.left + rect.width - coordinates.left;
 
           if (pos < 0) {
-            coordinates.left = rect.left + rect.width;
+            var inputStyle = window.getComputedStyle(element, null);
+            var inputPaddingRight = parseInt(inputStyle.getPropertyValue('padding-right')) || 0;
+            coordinates.left = rect.left + rect.width - inputPaddingRight;
           }
         }
 

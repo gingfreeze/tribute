@@ -515,7 +515,9 @@ class TributeRange {
         if (element.nodeName === 'INPUT') {
             const pos = rect.left + rect.width - coordinates.left;
             if (pos < 0) {
-                coordinates.left = rect.left + rect.width;
+                const inputStyle = window.getComputedStyle(element, null);
+                const inputPaddingRight = parseInt(inputStyle.getPropertyValue('padding-right')) || 0;
+                coordinates.left = rect.left + rect.width - inputPaddingRight;
             }
         }
 
